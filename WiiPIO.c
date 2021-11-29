@@ -8,7 +8,7 @@
 #include "linux/gpio.h"
 #include "sys/ioctl.h"
 #include "WiiPIOinit.h"
-struct* gpiohandle_data WiiPIOinit(int &GPIOs){
+struct* gpiohandle_data WiiPIOinit(int * GPIOs){
 
 	int fd, rv, i;
         /* Open the gpio device */
@@ -30,5 +30,5 @@ struct* gpiohandle_data WiiPIOinit(int &GPIOs){
 
 	        rv = ioctl(fd, GPIO_GET_LINEHANDLE_IOCTL, &req[i]); 
 
-	return data;
+	return req;
 }
