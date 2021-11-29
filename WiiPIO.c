@@ -18,13 +18,13 @@ struct* gpiohandle_data WiiPIOinit(int &GPIOs){
                 exit(1);
         }
 	struct gpiohandle_request req[14];
-	struct gpiohandle_data data[14];
+	//struct gpiohandle_data data[14];
 	for(i=0; i<14; i++){
 		//Struct and setup to define GPIO18 as output for LED blinking
 	        memset(&req[i], 0, sizeof(struct gpiohandle_request));
 	        req[i].flags = GPIOHANDLE_REQUEST_OUTPUT;
 	        req[i].lines = 1;
-	        req[i].lineoffsets[0] = *(GPIOs + i*sizeof(int));
+	        req[i].lineoffsets[0] = GPIOs[i];
 	        req[i].default_values[0] = 0;
 	        strcpy(req[i].consumer_label, "Wii");
 
