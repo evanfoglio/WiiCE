@@ -5,7 +5,7 @@
 //#include <wiringPiI2C.h>
 #include <errno.h>
 
-void Wii2c_setup(void) 
+int Wii2c_setup(void) 
 {
     int NUNCHUCK_DEVICE = 0x52;
     int fd, result;
@@ -30,5 +30,6 @@ void Wii2c_setup(void)
 
     usleep(500);
 
+    return fd;
     }
 }
