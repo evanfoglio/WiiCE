@@ -12,15 +12,25 @@ int init(int gpiovals[14]);
 
 int main(int argc, char **argv) {
 
-	int gpiovals[14] = {}
+	int gpiovals[14] = {7, 17, 27, 22, 10, 9, 11, // X-axis Values
+			   14, 15, 18, 23, 24, 25, 8};// Y-axis Values
+	//initWiiPIO(int gpiovals[14]){
+
+	//Assuming everything is set up below here,
 
 
-	init(int gpiovals[14]){
-		int i;
-		struct gpiohandle_data WiiPIOs[14];
-		for(i=0; i<14; i++){
-			WiiPIOs[i] = WiiPIOinit(gpioval[i]);
+	while(true) {
+
+		//Read in I2C values
+
+
+		//Write out to LEDs
+
 	}
+
+
+
+
 
 }
 
