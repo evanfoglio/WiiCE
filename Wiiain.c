@@ -14,35 +14,30 @@ int init(int gpiovals[14]);
 
 int main(int argc, char **argv) {
 
-    int gpiovals[14] = {7, 17, 27, 22, 10, 9, 11, // X-axis Values			   
-                        14, 15, 18, 23, 24, 25, 8};// Y-axis Values
+    // First half of array is for X axis, second half is for Y axis
+    int gpiovals[14] = {7, 17, 27, 22, 10, 9, 11, 14, 15, 18, 23, 24, 25, 8};
 
-    int bytes[6];
+    // Nunchuck returns 6 bytes
+    int nc_data[6];
     int i;
+    unsigned char buffer = 0x00;
 
     // Initialize the Nunchuck's I2C settings
-    Wii2c_setup();
+    int fd = Wii2c_setup();
 
     while(1) {
         
-        wiringPiI2CWrite(fd, 0x00);
-        delayMicroseconds(500);
-        for (i=0; i<6; i++) {
-            bytes[i] = wiringPiI2CRead(fd);
+        result = write(fd, buffer, 1);
+        usleep(500);
+
+        for (i = 0; i < 6; i++) {
+            bytes_read = read(fd, bytes[i], 1);
         }
 
-        int joyX = bytes[0];
-        int joyY = bytes[1];
+        int joyX = nc_data[0];
+        int joyY = nc_data[1];
 
-		//Write out to LEDs
+	//Write out to LEDs
 
-	}
-
-
-
-
-
+    }
 }
-
-
-
