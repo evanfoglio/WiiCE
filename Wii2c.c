@@ -1,36 +1,52 @@
 #include <stdio.h>
 #include <unistd.h>
 #include <stdlib.h>
-//#include <wiringPi.h>
-//#include <wiringPiI2C.h>
 #include <errno.h>
+#include <unistd.h>
+#include <stdint.h>
 #include <fcntl.h>
 #include <linux/i2c-dev.h>
-int Wii2c_setup(void) 
+#include <sys/ioctl.h> 
+#include "Wii2c.h"
+
+int i2c_access (int fd, char rw, uint8_t command, int size, union i2c_data *data)
 {
-    int NUNCHUCK_DEVICE = 0x52;
-    int fd, result;
-    unsigned char buffer[100] = {0};
-    
-    // Open i2c bus
-    fd = open("/dev/i2c-1", O_RDWR); 
-    if (fd < 0) {
-        printf("Error setting up I2C: %d\n", errno);
-        exit(-1);
-    }
-    
-    // Set device address
-    result = ioctl(fd, I2C_SLAVE, 0x70);
-    
-    //buffer[0x40] = 0x00;
-    result = write(fd, buffer, 100);    
-    if (result == 0) {
-        printf("Error writing to device: %d\n", errno);
-        exit(-2);
-    }
+  struct i2c_ioctl_args args;
 
-    usleep(500);
-
-    return fd;
+  args.read_write = rw;
+  args.command    = command;
+  args.size       = size;
+  args.data       = data;
+  return ioctl(fd, I2C_BUS, &args);
 }
 
+int write_i2c_register(int fd, int reg, int value)
+{
+  union i2c_data data ;
+
+  data.byte = value ;
+  return i2c_access(fd, I2C_WRITE, reg, I2C_BYTE_DATA, &data);
+}
+
+int read_i2c(int fd)
+{
+  union i2c_data data;
+
+  if (i2c_access(fd, I2C_READ, 0, I2C_BYTE, &data))
+    return -1 ;
+  else
+    return data.byte & 0xFF;
+}
+
+int setup_i2c(const char *device, int id)
+{
+  int fd = 0;
+
+  if ((fd = open(device, O_RDWR)) < 0)
+    return -1;
+
+  if (ioctl(fd, I2C_SLAVE, id) < 0)
+    return -1;
+
+  return fd ;
+}

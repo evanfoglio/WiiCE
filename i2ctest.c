@@ -6,60 +6,68 @@
 #include <stdint.h>
 #include <fcntl.h>
 #include <linux/i2c-dev.h>
-#include <sys/fcntl.h> 
-#include <sys/stat.h>
-#include <sys/ioctl.h>  
-#define I2C_BUS   0x0720
-#define I2C_SLAVE 0x0703
-#define I2C_READ  1
-#define I2C_WRITE 0
-#define I2C_BYTE  1
-#define I2C_DATA  2 
+#include <ioctl.h>  
 
-struct i2c_ioctl_data
+#define I2C_SLAVE 0x0703
+#define I2C_BUS 0x0720
+#define I2C_READ 1
+#define I2C_WRITE 0
+#define I2C_BYTE 1
+#define I2C_BYTE_DATA 2 
+
+union i2c_data
 {
-    char read_write;
-    uint8_t command;
-    int size;
-    uint8_t data;
+  uint8_t  byte;
 };
 
-static inline int i2c_access (int fd, char rw, uint8_t command, int size, uint8_t data)
+struct i2c_ioctl_args
 {
-    struct i2c_ioctl_data args;
+  char read_write;
+  uint8_t command;
+  int size;
+  union i2c_data *data;
+};
 
-    args.read_write = rw;
-    args.command    = command;
-    args.size       = size;
-    args.data       = data;     
-    return ioctl(fd, I2C_BUS, &args);
+int i2c_access (int fd, char rw, uint8_t command, int size, union i2c_data *data)
+{
+  struct i2c_ioctl_args args;
+
+  args.read_write = rw;
+  args.command    = command;
+  args.size       = size;
+  args.data       = data;
+  return ioctl(fd, I2C_BUS, &args);
 }
 
-int write_i2c_register(int fd, int reg, uint8_t value)
+int write_i2c_register(int fd, int reg, int value)
 {
-  return i2c_access(fd, I2C_WRITE, reg, I2C_DATA, value);
+  union i2c_data data ;
+
+  data.byte = value ;
+  return i2c_access(fd, I2C_WRITE, reg, I2C_BYTE_DATA, &data);
 }
 
 int read_i2c(int fd)
 {
-    uint8_t data = 0;
-    if (i2c_access(fd, I2C_READ, 0, I2C_BYTE, data))
-        return -1 ;
-    else
-        return data;
+  union i2c_data data;
+
+  if (i2c_access(fd, I2C_READ, 0, I2C_BYTE, &data))
+    return -1 ;
+  else
+    return data.byte & 0xFF;
 }
 
 int setup_i2c(const char *device, int id)
 {
-    int fd = 0;
+  int fd = 0;
 
-    if ((fd = open(device, O_RDWR)) < 0)
-        return -1;
+  if ((fd = open(device, O_RDWR)) < 0)
+    return -1;
 
-    if (ioctl(fd, I2C_SLAVE, id) < 0)
-        return -1;
+  if (ioctl(fd, I2C_SLAVE, id) < 0)
+    return -1;
 
-    return fd ;
+  return fd ;
 }
 
 int main(void) {
@@ -76,7 +84,7 @@ int main(void) {
     int i;
     while(1) {
     
-        i2c_access(fd, I2C_WRITE, 0x00, I2C_BYTE, 0) ;
+        i2c_access(fd, I2C_WRITE, 0x00, I2C_BYTE, NULL) ;
         usleep(500);
     
         for (i=0; i<6; i++) {
@@ -90,21 +98,3 @@ int main(void) {
     }
     return 0;
 }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
