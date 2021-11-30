@@ -79,12 +79,17 @@ void lightUpAll(struct gpiohandle_request * req, int * gpios) {
 
 
 
-void ledCtrl(int value) {
+void ledCtrlX(int value) {
 
 	
 
 }
 
+void ledCtrlY(int value) {
+
+
+
+}
 
 
 
