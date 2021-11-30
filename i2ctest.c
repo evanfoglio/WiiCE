@@ -34,12 +34,13 @@ int main(int argc, char **argv) {
     
 
     // Nunchuck returns 6 bytes
-    unsigned char nc_data[6];
-    unsigned char joyX, joyY; 
+    unsigned char nc_data[6] = {0};
+    unsigned char joyX = 0, joyY = 0; 
     int i;
     unsigned char buffer = 0x00;
     // Initialize the Nunchuck's I2C settings
-    int fd = Wii2c_setup();
+    int fd = Wii2c_setup();    
+
     while(1) {
         
         result = write(fd, buffer, 1);
