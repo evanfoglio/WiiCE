@@ -49,11 +49,12 @@ int main(int argc, char **argv) {
         //result = write(fd, buffer, 1);
         usleep(500);
 
-        for (i = 0; i < 6; i++) {
-            bytes_read = read(fd, nc_data[i], 1);
-            
+        bytes_read = read(fd, nc_data, 2);
+        if (bytes_read == 0) {
+            printf("Error: Unable to read from device.\n");
+            exit(-1);
         }
-
+            
         joyX = nc_data[0];
         joyY = nc_data[1];
         printf("X: %3d\tY:%3d\n", joyX, joyY);
