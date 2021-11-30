@@ -32,7 +32,7 @@ int main(int argc, char **argv) {
     printf("2\n");
     
      
-    rv=ioctl(req[0].fd, GPIOHANDLE_SET_LINE_VALUES_IOCTL, &data);
+    rv=ioctl(fd, GPIOHANDLE_SET_LINE_VALUES_IOCTL, &data);
     
 
 
