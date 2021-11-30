@@ -4,6 +4,8 @@
 #include <unistd.h>     /* close() */
 #include <string.h>
 #include <errno.h>
+#include <wiringPi.h>
+#include <wiringPiI2C.h>
 #include "linux/gpio.h"
 #include "sys/ioctl.h"
 #include "Wii2c.h"
@@ -39,15 +41,17 @@ int main(int argc, char **argv) {
     int i;
     unsigned char buffer = 0x00;
     // Initialize the Nunchuck's I2C settings
-    int fd = Wii2c_setup();    
+    int fd = Wii2c_setup();
+    wiringPiI2CWriteReg8(fd, 0x40, 0x00);    
 
     while(1) {
-        
-        result = write(fd, buffer, 1);
+        wiringPiI2CWrite(fd, 0x00); 
+        //result = write(fd, buffer, 1);
         usleep(500);
 
         for (i = 0; i < 6; i++) {
             bytes_read = read(fd, nc_data[i], 1);
+            
         }
 
         joyX = nc_data[0];
