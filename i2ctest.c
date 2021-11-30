@@ -1,102 +1,118 @@
 #include <stdio.h>
-#include <linux/i2c-dev.h>
-#include <fcntl.h>      /* open() */
-#include <unistd.h>     /* close() */
-#include <string.h>
+#include <unistd.h>
+#include <stdlib.h>
 #include <errno.h>
-#include <wiringPi.h>
-#include <wiringPiI2C.h>
-#include "linux/gpio.h"
-#include "sys/ioctl.h"
-#include "Wii2c.h"
-#include "WiiPIO.h"
+#include <unistd.h>
+#include <stdint.h>
+#include <fcntl.h>
+#include <linux/i2c-dev.h>
+#include <sys/fcntl.h> 
+#include <sys/stat.h>
+#include <sys/ioctl.h>  
+#define I2C_SLAVE       0x0703
+#define I2C_BUS       0x0720  /* SMBus-level access */
 
-//int init(int gpiovals[14]);
-void lightUpAll(struct gpiohandle_request * req, int * gpios);
-int main(int argc, char **argv) {
+#define I2C_BUS_READ  1
+#define I2C_BUS_WRITE 0
 
-    int rv;
-    int result;
-    int bytes_read;
-    //int fd;
-    //fd = open("/dev/gpiochip0",O_RDWR);
+// SMBus transaction types
 
+#define I2C_BUS_QUICK             0
+#define I2C_BUS_BYTE              1
+#define I2C_BUS_BYTE_DATA         2 
+#define I2C_BUS_WORD_DATA         3
+#define I2C_BUS_PROC_CALL         4
+#define I2C_BUS_BLOCK_DATA        5
+#define I2C_BUS_I2C_BLOCK_BROKEN  6
+#define I2C_BUS_BLOCK_PROC_CALL   7           /* SMBus 2.0 */
+#define I2C_BUS_I2C_BLOCK_DATA    8
+#define I2C_BUS_BLOCK_MAX     32      /* As specified in SMBus standard */    
+#define I2C_BUS_I2C_BLOCK_MAX 32      /* Not specified but we use same structure */
 
-    // First half of array is for X axis, second half is for Y axis
-    int gpiovals[14] = {17, 27, 22, 10, 9, 5, 6, 14, 15, 18, 23, 24, 25, 8};
+union i2c_data
+{
+  uint8_t  byte;
+  uint16_t word;
+  uint8_t  block[I2C_BUS_BLOCK_MAX + 2];    // block [0] is used for length + one more for PEC
+};
+
+struct i2c_ioctl_data
+{
+  char read_write;
+  uint8_t command;
+  int size;
+  union i2c_data *data;
+};
+
+static inline int i2c_access (int fd, char rw, uint8_t command, int size, union i2c_data *data)
+{
+  struct i2c_ioctl_data args;
+
+  args.read_write = rw;
+  args.command    = command;
+  args.size       = size;
+  args.data       = data;
+  return ioctl(fd, I2C_BUS, &args);
+}
+
+int write_i2c_register(int fd, int reg, int value)
+{
+  union i2c_data data ;
+
+  data.byte = value ;
+  return i2c_access(fd, I2C_BUS_WRITE, reg, I2C_BUS_BYTE_DATA, &data);
+}
+
+int read_i2c(int fd)
+{
+  union i2c_data data;
+
+  if (i2c_access(fd, I2C_BUS_READ, 0, I2C_BUS_BYTE, &data))
+    return -1 ;
+  else
+    return data.byte & 0xFF;
+}
+
+int setup_i2c(const char *device, int id)
+{
+  int fd = 0;
+
+  if ((fd = open(device, O_RDWR)) < 0)
+    return -1;
+
+  if (ioctl(fd, I2C_SLAVE, id) < 0)
+    return -1;
+
+  return fd ;
+}
+
+int main(void) {
     
-    struct gpiohandle_request req[14];
-    WiiPIOinit(gpiovals, req);
+    int fd = setup_i2c("/dev/i2c-1", 0x52);
+    if (fd < 0) {
+        printf("Error setting up I2C: %d\n", errno);
+        exit(0);
+    }
+    write_i2c_register(fd, 0x40, 0x00);
+    usleep(500);
 
-    //struct gpiohandle_data data;
-    //memset(&data,0,sizeof(struct gpiohandle_data)); 
-    //data.values[0]=1; // value to output (0 or 1)
-    //wirtes first gpio in array high, 4 doesnt work?
-    //rv=ioctl( req[0].fd, GPIOHANDLE_SET_LINE_VALUES_IOCTL, &data);
-    
-
-    // Nunchuck returns 6 bytes
-    unsigned char nc_data[6] = {0};
-    unsigned char joyX = 0, joyY = 0; 
+    int bytes[6];
     int i;
-    unsigned char buffer = 0x00;
-    // Initialize the Nunchuck's I2C settings
-    int fd = Wii2c_setup();
-    wiringPiI2CWriteReg8(fd, 0x40, 0x00);    
-
     while(1) {
-        wiringPiI2CWrite(fd, 0x00); 
-        //result = write(fd, buffer, 1);
+    
+        i2c_access(fd, I2C_BUS_WRITE, 0x00, I2C_BUS_BYTE, NULL) ;
         usleep(500);
-
-        bytes_read = read(fd, nc_data, 2);
-        if (bytes_read == 0) {
-            printf("Error: Unable to read from device.\n");
-            exit(-1);
+    
+        for (i=0; i<6; i++) {
+            bytes[i] = read_i2c(fd);
         }
-            
-        joyX = nc_data[0];
-        joyY = nc_data[1];
-        printf("X: %3d\tY:%3d\n", joyX, joyY);
 
-	//Write out to LEDs
+        int joyX = bytes[0];
+        int joyY = bytes[1];
 
+        printf("X: %4d\tjoyY = %4d\n", joyX, joyY);
     }
     return 0;
-}
-
-/*
- * This function takes in the array of GPIOs and 
- * assuming they have all been initialized,
- * turns all of the GPIOs on
- */
-void lightUpAll(struct gpiohandle_request * req, int * gpios) {
-
-    int rv;
-    struct gpiohandle_data data;
-    memset(&data,0,sizeof(struct gpiohandle_data));
-    data.values[0]=1; // value to output (0 or 1)
-
-    for(int i = 0; i < 14; i++) {
-
-	rv = ioctl(req[i].fd, GPIOHANDLE_SET_LINE_VALUES_IOCTL, &data); 
-
-    }
-
-}
-
-
-
-void ledCtrlX(int value) {
-
-	
-
-}
-
-void ledCtrlY(int value) {
-
-
-
 }
 
 
