@@ -85,7 +85,7 @@ void ledCtrlX(int value, struct gpiohandle_request * req) {
     for(int i = 0; i < 7; i++) 
     memset(&data[i],0,sizeof(struct gpiohandle_data));
 
-    switch(value)
+    switch(value){
         case(value < 40):
 	    data[3].values[0]=1;
 	    data[2].values[0]=1;
@@ -118,7 +118,7 @@ void ledCtrlX(int value, struct gpiohandle_request * req) {
 	    break;
 	default :
 	    data[3].values[0]=1;	
-
+    }
     for(int i = 0; i < 7; i++) {
 	rv = ioctl(req[i].fd, GPIOHANDLE_SET_LINE_VALUES_IOCTL, &data[i]);
     }	
@@ -131,7 +131,7 @@ void ledCtrlY(int value) {
     struct gpiohandle_data data[7];
     for(int i = 0; i < 7; i++) memset(&data[i],0,sizeof(struct gpiohandle_data));
 
-    switch(value)
+    switch(value){
         case(value < 40):
             data[3].values[0]=1;
             data[2].values[0]=1;
@@ -164,6 +164,7 @@ void ledCtrlY(int value) {
             break;
         default :
             data[3].values[0]=1;
+    }
     for(int i = 0; i < 7; i++) {
         rv = ioctl(req[i+7].fd, GPIOHANDLE_SET_LINE_VALUES_IOCTL, &data[i]);
     }
