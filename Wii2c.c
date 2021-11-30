@@ -4,7 +4,8 @@
 //#include <wiringPi.h>
 //#include <wiringPiI2C.h>
 #include <errno.h>
-
+#include <fcntl.h>
+#include <linux/i2c-dev.h>
 int Wii2c_setup(void) 
 {
     int NUNCHUCK_DEVICE = 0x52;
@@ -12,7 +13,7 @@ int Wii2c_setup(void)
     unsigned char buffer[100] = {0};
     
     // Open i2c bus
-    fd = open("/dev/i2c-1", O_RDWR) 
+    fd = open("/dev/i2c-1", O_RDWR); 
     if (fd < 0) {
         printf("Error setting up I2C: %d\n", errno);
         exit(-1);
@@ -31,5 +32,5 @@ int Wii2c_setup(void)
     usleep(500);
 
     return fd;
-    }
 }
+

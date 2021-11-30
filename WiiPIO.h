@@ -1,1 +1,1 @@
-struct gpiohandle_data WiiPIOinit(int GPIO);
+struct gpiohandle_request * WiiPIOinit(int * GPIO);

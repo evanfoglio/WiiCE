@@ -1,5 +1,5 @@
 #include <stdio.h>
-
+#include <stdlib.h>
 #include <fcntl.h>      /* open() */
 #include <unistd.h>     /* close() */
 #include <string.h>
@@ -7,8 +7,8 @@
 
 #include "linux/gpio.h"
 #include "sys/ioctl.h"
-#include "WiiPIOinit.h"
-struct* gpiohandle_data WiiPIOinit(int * GPIOs){
+#include "WiiPIO.h"
+struct gpiohandle_request * WiiPIOinit(int * GPIOs){
 
 	int fd, rv, i;
         /* Open the gpio device */
@@ -29,6 +29,7 @@ struct* gpiohandle_data WiiPIOinit(int * GPIOs){
 	        strcpy(req[i].consumer_label, "Wii");
 
 	        rv = ioctl(fd, GPIO_GET_LINEHANDLE_IOCTL, &req[i]); 
-
+	}
 	return req;
 }
+
