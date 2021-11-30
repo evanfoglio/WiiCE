@@ -8,7 +8,7 @@
 #include "linux/gpio.h"
 #include "sys/ioctl.h"
 #include "WiiPIO.h"
-struct gpiohandle_request * WiiPIOinit(int * GPIOs){
+int WiiPIOinit(int * GPIOs, struct gpiohandle_request * req){
 
 	int fd, rv, i;
         /* Open the gpio device */
@@ -17,7 +17,7 @@ struct gpiohandle_request * WiiPIOinit(int * GPIOs){
                 printf("%s\n", strerror(errno));
                 exit(1);
         }
-	struct gpiohandle_request req[14];
+	//struct gpiohandle_request req[14];
 	//struct gpiohandle_data data[14];
 	for(i=0; i<14; i++){
 		//Struct and setup to define GPIO18 as output for LED blinking
