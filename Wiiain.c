@@ -25,7 +25,6 @@ int main(int argc, char **argv) {
     
     struct gpiohandle_request req[14];
     WiiPIOinit(gpiovals, req);
-    lightUpAll(req, gpiovals);
 
     //struct gpiohandle_data data;
     //memset(&data,0,sizeof(struct gpiohandle_data)); 
@@ -58,6 +57,11 @@ int main(int argc, char **argv) {
     return 0;
 }
 
+/*
+ * This function takes in the array of GPIOs and 
+ * assuming they have all been initialized,
+ * turns all of the GPIOs on
+ */
 void lightUpAll(struct gpiohandle_request * req, int * gpios) {
 
     int rv;
@@ -75,7 +79,11 @@ void lightUpAll(struct gpiohandle_request * req, int * gpios) {
 
 
 
+void ledCtrl(int value) {
 
+	
+
+}
 
 
 
