@@ -11,6 +11,11 @@
 
 //int init(int gpiovals[14]);
 void lightUpAll(struct gpiohandle_request * req, int * gpios);
+void ledCtrlX(int value, struct gpiohandle_request * req);
+void ledCtrlY(int value, struct gpiohandle_request * req);
+
+
+
 int main(int argc, char **argv) {
 
     int rv;
@@ -79,92 +84,91 @@ void lightUpAll(struct gpiohandle_request * req, int * gpios) {
 }
 
 
-
 void ledCtrlX(int value, struct gpiohandle_request * req) {
     int rv;
     struct gpiohandle_data data[7];
-    for(int i = 0; i < 7; i++) memset(&data[i],0,sizeof(struct gpiohandle_data));
+    for(int i = 0; i < 7; i++) 
+        memset(&data[i],0,sizeof(struct gpiohandle_data));
 
-    switch(value)
-        case(value < 40):
-	    data.values[3]=1;
-	    data.values[2]=1;
-	    data.values[1]=1;
-	    data.values[0]=1;
-	    break;
-	case(value < 60):
-	    data.values[3]=1;
-            data.values[2]=1;
-            data.values[1]=1;
-	    break;
-	case(value < 90):
-	    data.values[3]=1;
-            data.values[2]=1;
-	    break;
-	case(value > 190):
-	    data.values[3]=1;
-            data.values[4]=1;
-            data.values[5]=1;
-            data.values[6]=1;
-            break;
-	case(value > 150):
-	    data.values[3]=1;
-            data.values[4]=1;
-            data.values[5]=1;
-	    break;
-	case(value > 120):
-	    data.values[3]=1;
-            data.values[4]=1;
-	    break;
-	default :
-	    data.values[3]=1;	
-
+    if(value < 40){
+	    data[3].values[0]=1;
+	    data[2].values[0]=1;
+	    data[1].values[0]=1;
+	    data[0].values[0]=1;
+    }
+    else if(value < 60){
+	    data[3].values[0]=1;
+            data[2].values[0]=1;
+            data[1].values[0]=1;
+    }
+    else if(value < 90){
+	    data[3].values[0]=1;
+            data[2].values[0]=1;
+    }
+    else if(value > 190){
+	    data[3].values[0]=1;
+            data[4].values[0]=1;
+            data[5].values[0]=1;
+            data[6].values[0]=1;
+    }
+    else if(value > 150){
+	    data[3].values[0]=1;
+            data[4].values[0]=1;
+            data[5].values[0]=1;
+    }
+    else if(value > 120){
+	    data[3].values[0]=1;
+            data[4].values[0]=1;
+    }
+    else{
+	    data[3].values[0]=1;	
+    }
     for(int i = 0; i < 7; i++) {
 	rv = ioctl(req[i].fd, GPIOHANDLE_SET_LINE_VALUES_IOCTL, &data[i]);
     }	
 
 }
 
-void ledCtrlY(int value) {
+void ledCtrlY(int value, struct gpiohandle_request * req) {
 
-int rv;
+    int rv;
     struct gpiohandle_data data[7];
-    for(int i = 0; i < 7; i++) memset(&data[i],0,sizeof(struct gpiohandle_data));
-
-    switch(value)
-        case(value < 45):
-            data.values[3]=1;
-            data.values[2]=1;
-            data.values[1]=1;
-            data.values[0]=1;
-            break;
-        case(value < 60):
-            data.values[3]=1;
-            data.values[2]=1;
-            data.values[1]=1;
-            break;
-        case(value < 90):
-            data.values[3]=1;
-            data.values[2]=1;
-            break;
-        case(value > 190):
-            data.values[3]=1;
-            data.values[4]=1;
-            data.values[5]=1;
-            data.values[6]=1;
-            break;
-        case(value > 160):
-            data.values[3]=1;
-            data.values[4]=1;
-            data.values[5]=1;
-            break;
-        case(value > 140):
-            data.values[3]=1;
-            data.values[4]=1;
-            break;
-        default :
-            data.values[3]=1;
-
+    for(int i = 0; i < 7; i++) 
+        memset(&data[i],0,sizeof(struct gpiohandle_data));
+    if(value < 45){
+            data[3].values[0]=1;
+            data[2].values[0]=1;
+            data[1].values[0]=1;
+            data[0].values[0]=1;
+    }
+    else if(value < 60){
+            data[3].values[0]=1;
+            data[2].values[0]=1;
+            data[1].values[0]=1;
+    }
+    else if(value < 90){
+            data[3].values[0]=1;
+            data[2].values[0]=1;
+    }
+    else if(value > 190){
+            data[3].values[0]=1;
+            data[4].values[0]=1;
+            data[5].values[0]=1;
+            data[6].values[0]=1;
+    }
+    else if(value > 165){
+            data[3].values[0]=1;
+            data[4].values[0]=1;
+            data[5].values[0]=1;
+    }
+    else if(value > 140){
+            data[3].values[0]=1;
+            data[4].values[0]=1;
+    }
+    else{
+            data[3].values[0]=1;
+    }
+   
     for(int i = 0; i < 7; i++) {
         rv = ioctl(req[i+7].fd, GPIOHANDLE_SET_LINE_VALUES_IOCTL, &data[i]);
     }
