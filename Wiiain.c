@@ -11,6 +11,11 @@
 
 //int init(int gpiovals[14]);
 void lightUpAll(struct gpiohandle_request * req, int * gpios);
+void ledCtrlX(int value, struct gpiohandle_request * req);
+void ledCtrlY(int value, struct gpiohandle_request * req);
+
+
+
 int main(int argc, char **argv) {
 
     int rv;
@@ -83,7 +88,7 @@ void ledCtrlX(int value, struct gpiohandle_request * req) {
     int rv;
     struct gpiohandle_data data[7];
     for(int i = 0; i < 7; i++) 
-    memset(&data[i],0,sizeof(struct gpiohandle_data));
+        memset(&data[i],0,sizeof(struct gpiohandle_data));
 
     switch(value){
         case(value < 40):
@@ -125,11 +130,12 @@ void ledCtrlX(int value, struct gpiohandle_request * req) {
 
 }
 
-void ledCtrlY(int value) {
+void ledCtrlY(int value, struct gpiohandle_request * req) {
 
     int rv;
     struct gpiohandle_data data[7];
-    for(int i = 0; i < 7; i++) memset(&data[i],0,sizeof(struct gpiohandle_data));
+    for(int i = 0; i < 7; i++) 
+        memset(&data[i],0,sizeof(struct gpiohandle_data));
 
     switch(value){
         case(value < 40):
